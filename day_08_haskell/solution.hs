@@ -18,6 +18,7 @@ parsePair raw = (cmd, num)
 
 runProgram :: [([Char], Int)] -> Int
 runProgram cmds = runProgram' cmds 0 0 S.empty
+
 runProgram' cmds idx acc visited 
     | S.member idx visited  = acc
     | otherwise             = runProgram' cmds idx' acc' visited'
@@ -25,4 +26,4 @@ runProgram' cmds idx acc visited
         visited' = S.insert idx visited
         (cmd, num) = cmds !! idx
         acc' = if cmd == "acc" then acc + num else acc
-        idx' = if cmd == "acc" || cmd == "nop" then idx + 1 else idx + num
+        idx' = if cmd == "jmp" then idx + num else idx + 1
