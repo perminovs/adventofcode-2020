@@ -36,7 +36,7 @@ parsePair raw = (cmd, num)
 {-| Run given list of commands and return tuple of:
     * value of accumulator at the end of program (or at point before infinite loop starts)
     * indexes list of executed "nop" and "jmp" commands in reversed order
-    * index of last executed command
+    * last executed command index
 -}
 runProgram :: [([Char], Int)] -> (Int, [Int], Int)
 runProgram cmds = runProgram' cmds 0 0 S.empty []
@@ -48,9 +48,9 @@ runProgram' cmds idx acc visited order
     where
         visited' = S.insert idx visited
         (cmd, num) = cmds !! idx
-        order' = if cmd /= "acc" then idx : order else order
-        acc' = if cmd == "acc" then acc + num else acc
-        idx' = if cmd == "jmp" then idx + num else idx + 1
+        order' = if cmd == "acc" then order else idx : order
+        acc'   = if cmd == "acc" then acc + num else acc
+        idx'   = if cmd == "jmp" then idx + num else idx + 1
 
 -- | Returns True if given command list has infinite loop and False otherwise.
 hasLoop :: [([Char], Int)] -> Bool
