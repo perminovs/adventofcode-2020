@@ -12,21 +12,20 @@ solution puzzle = j1 * j3
         j1 = (M.!) jumps 1
         j3 = (M.!) jumps 3
 
-solution' levels prev idx passed
-    | idx >= length levels  = M.insertWith (+) 3 1 passed
-    | otherwise             = solution' levels cur (idx + 1) passed'
+solution' levels prev idx jumps
+    | idx >= length levels  = M.insertWith (+) 3 1 jumps
+    | otherwise             = solution' levels cur (idx + 1) jumps'
     where
         cur = levels !! idx
         diff = cur - prev
-        passed' = M.insertWith (+) diff 1 passed
+        jumps' = M.insertWith (+) diff 1 jumps
 
 solution2 puzzle = (M.!) allPoints 0
     where 
-        levels = parsePuzzle puzzle
-        levels' = 0 : levels
-        lastIdx = length levels' - 1
+        levels = 0 : parsePuzzle puzzle
+        lastIdx = length levels - 1
         points = M.fromList [(lastIdx, 1)]
-        allPoints = solution2' levels' (lastIdx - 1) points
+        allPoints = solution2' levels (lastIdx - 1) points
 
 solution2' levels idx points
     | idx < 0    = points
@@ -35,12 +34,11 @@ solution2' levels idx points
         cur = levels !! idx
         nextAdapters = [(safeGetByInd levels (idx + i), idx + i) | i <- [1,2,3]]
         possibleAdapterIndexes = [i | (v, i) <- nextAdapters, v > 0, v - cur < 4]
-
         possibleVariants = sum [(M.!) points i | i <- possibleAdapterIndexes]
         points' = M.insertWith (+) idx possibleVariants points
 
 
-safeGetByKey map' k = if M.member k map' then (M.!) map' k else 0
+safeGetByKey dict k = if M.member k dict then (M.!) dict k else 0
 
 safeGetByInd values i = if i < length values then values !! i else -1
 
