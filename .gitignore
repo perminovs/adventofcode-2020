@@ -19,3 +19,8 @@ data.csv
 
 .venv_pure
 .venv
+
+*.jar
+libs/
+out/
+*.iml
