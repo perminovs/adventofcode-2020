@@ -24,3 +24,4 @@ data.csv
 libs/
 out/
 *.iml
+.gradle/
