@@ -56,9 +56,9 @@ class Field(rawCells: String) {
 
         for (dxFunc in listOf(decr, const, incr)) {
             for (dyFunc in listOf(decr, const, incr)) {
+                if (dxFunc == const && dyFunc == const) continue
                 cx = dxFunc(x)
                 cy = dyFunc(y)
-                if (dxFunc == const && dyFunc == const) continue
 
                 while (this.isCorrectIdx(cx, cy)) {
 
