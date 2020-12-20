@@ -30,7 +30,7 @@ class FieldTest {
         #.######.#
         #.#####.##""".trimIndent()
 
-    private val terminalState = """
+    private val terminalState1 = """
         #.#L.L#.##
         #LLL#LL.L#
         L.#.L..#..
@@ -41,6 +41,21 @@ class FieldTest {
         #L#L##L#L#
         #.LLLLLL.L
         #.#L#L#.##""".trimIndent()
+
+    private val terminalState2 = """
+        #.L#.L#.L#
+        #LLLLLL.LL
+        L.L.L..#..
+        ##L#.#L.L#
+        L.L#.LL.L#
+        #.LLLL#.LL
+        ..#.L.....
+        LLL###LLL#
+        #.LLLLL#.L
+        #.L#LL#.L#""".trimIndent()
+
+    private val partOneThreshold = 4
+    private val partTwoThreshold = 5
 
 
     @Test
@@ -63,7 +78,7 @@ class FieldTest {
     }
 
     @ParameterizedTest
-    @MethodSource("neighbours")
+    @MethodSource("neighboursTestData")
     fun countNeighbourTest(x: Int, y: Int, expected: Int) {
         val simple = """
         #.#L
@@ -73,20 +88,63 @@ class FieldTest {
         Assertions.assertEquals(Field(simple).getNeighboursCount(x, y), expected)
     }
 
+    @ParameterizedTest
+    @MethodSource("visibleTestData")
+    fun countVisibleTest(rawField: String, x: Int, y: Int, expected: Int) {
+        Assertions.assertEquals(Field(rawField).getVisibleCount(x, y), expected)
+    }
+
     companion object {
         @JvmStatic
-        fun neighbours() = listOf(
+        fun neighboursTestData() = listOf(
             Arguments.of(0, 0, 1),
             Arguments.of(1, 1, 4),
             Arguments.of(1, 2, 2),
             Arguments.of(3, 2, 1),
+        )
+
+        @JvmStatic
+        fun visibleTestData() = listOf(
+            Arguments.of(
+                """
+                .......#.
+                ...#.....
+                .#.......
+                .........
+                ..#L....#
+                ....#....
+                .........
+                #........
+                ...#.....""".trimIndent(),
+                3, 4, 8,
+            ),
+            Arguments.of(
+                """
+                .............
+                .L.L.#.#.#.#.
+                .............
+                """.trimIndent(),
+                1, 1, 0,
+            ),
+            Arguments.of(
+                """
+                .##.##.
+                #.#.#.#
+                ##...##
+                ...L...
+                ##...##
+                #.#.#.#
+                .##.##.""".trimIndent(),
+                3, 3, 0,
+            )
         )
     }
 
     @Test
     fun oneStepWhenChangedTest() {
         val field = Field(initialState)
-        val hasChanged = field.makeStep()
+        val getNeighbours = { x: Int, y: Int -> field.getNeighboursCount(x, y) }
+        val hasChanged = field.makeStep(partOneThreshold, getNeighbours)
 
         Assertions.assertTrue(hasChanged)
         Assertions.assertEquals(field, Field(oneStepState))
@@ -94,19 +152,29 @@ class FieldTest {
 
     @Test
     fun oneStepWhenNotChangedTest() {
-        val field = Field(terminalState)
-        val hasChanged = field.makeStep()
+        val field = Field(terminalState1)
+        val getNeighbours = { x: Int, y: Int -> field.getNeighboursCount(x, y) }
+        val hasChanged = field.makeStep(partOneThreshold, getNeighbours)
 
         Assertions.assertFalse(hasChanged)
-        Assertions.assertEquals(field, Field(terminalState))
+        Assertions.assertEquals(field, Field(terminalState1))
     }
 
     @Test
-    fun runAllTest() {
+    fun solution1Test() {
         val field = Field(initialState)
-        val occupiedTotal = field.runUntilStable()
+        val occupiedTotal = field.runUntilStablePart1(partOneThreshold)
 
         Assertions.assertEquals(occupiedTotal, 37)
-        Assertions.assertEquals(field, Field(terminalState))
+        Assertions.assertEquals(field, Field(terminalState1))
+    }
+
+    @Test
+    fun solution2Test() {
+        val field = Field(initialState)
+        val occupiedTotal = field.runUntilStablePart2(partTwoThreshold)
+
+        Assertions.assertEquals(occupiedTotal, 26)
+        Assertions.assertEquals(field, Field(terminalState2))
     }
 }

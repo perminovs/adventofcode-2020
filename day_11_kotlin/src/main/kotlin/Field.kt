@@ -27,6 +27,10 @@ class Field(rawCells: String) {
 
     override fun equals(other: Any?): Boolean = (other is Field) && this.cells == other.cells
 
+    override fun hashCode(): Int = cells.hashCode()
+
+    private fun isCorrectIdx(x: Int, y: Int): Boolean = (y >= 0 && y < this.cells.size && x >= 0 && x < this.cells[y].size )
+
     fun getNeighboursCount(x: Int, y: Int): Int {
         var count = 0
         for (dx in listOf(-1, 0, 1)) {
@@ -34,14 +38,46 @@ class Field(rawCells: String) {
                 if (dx == 0 && dy == 0) continue
                 val nx = x + dx
                 val ny = y + dy
-                if (nx < 0 || nx >= this.cells[y].size || ny < 0 || ny >= this.cells.size ) continue
+                if (!this.isCorrectIdx(nx, ny)) continue
                 if (this.cells[ny][nx] == State.OCCUPIED) count += 1
             }
         }
         return count
     }
 
-    fun makeStep(): Boolean {
+    fun getVisibleCount(x: Int, y: Int): Int {
+        val decr: (Int) -> Int = { it - 1 }
+        val incr: (Int) -> Int = { it + 1 }
+        val const: (Int) -> Int = { it }
+
+        var count = 0
+        var cx: Int
+        var cy: Int
+
+        for (dxFunc in listOf(decr, const, incr)) {
+            for (dyFunc in listOf(decr, const, incr)) {
+                cx = dxFunc(x)
+                cy = dyFunc(y)
+                if (dxFunc == const && dyFunc == const) continue
+
+                while (this.isCorrectIdx(cx, cy)) {
+
+                    when (this.cells[cy][cx]) {
+                        State.OCCUPIED -> { count += 1; break }
+                        State.EMPTY -> break
+                        else -> {}
+                    }
+
+                    cx = dxFunc(cx)
+                    cy = dyFunc(cy)
+                }
+            }
+        }
+
+        return count
+    }
+
+    fun makeStep(occupiedToEmptyThreshold: Int, neighboursCounter: (Int, Int) -> Int): Boolean {
         val newState: MutableList<MutableList<State>> = mutableListOf()
         var hasChanged = false
         for (y in 0 until this.cells.size) {
@@ -49,10 +85,10 @@ class Field(rawCells: String) {
             for (x in 0 until this.cells[y].size) {
                 val s = this.cells[y][x]
 
-                if (s == State.EMPTY && getNeighboursCount(x, y) == 0) {
+                if (s == State.EMPTY && neighboursCounter(x, y) == 0) {
                     newRow.add(State.OCCUPIED)
                     hasChanged = true
-                } else if (s == State.OCCUPIED && getNeighboursCount(x, y) >= 4) {
+                } else if (s == State.OCCUPIED && neighboursCounter(x, y) >= occupiedToEmptyThreshold) {
                     newRow.add(State.EMPTY)
                     hasChanged = true
                 } else {
@@ -65,8 +101,20 @@ class Field(rawCells: String) {
         return hasChanged
     }
 
-    fun runUntilStable(): Int {
-        while (this.makeStep()) {}
+    fun runUntilStablePart1(occupiedToEmptyThreshold: Int): Int {
+        val getNeighbours = { x: Int, y: Int -> this.getNeighboursCount(x, y) }
+        while (this.makeStep(occupiedToEmptyThreshold, getNeighbours)) {}
+
+        var occupied = 0
+        for (row in this.cells)
+            for (cell in row)
+                if (cell == State.OCCUPIED) occupied += 1
+        return occupied
+    }
+
+    fun runUntilStablePart2(occupiedToEmptyThreshold: Int): Int {
+        val getNeighbours = { x: Int, y: Int -> this.getVisibleCount(x, y) }
+        while (this.makeStep(occupiedToEmptyThreshold, getNeighbours)) {}
 
         var occupied = 0
         for (row in this.cells)
