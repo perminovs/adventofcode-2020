@@ -1,7 +1,8 @@
 import pytest
 
-from day_14_python.solution import apply_mask, solution, parse_mask, parse_insert, apply_mask2, int_to_bin, \
-    resolve_floating, solution2
+from day_14_python.solution import (
+    apply_mask, solution, parse_mask, parse_insert, apply_mask2, int_to_bin, resolve_floating, solution2,
+)
 
 TEST_INPUT = """
 mask = XXXXXXXXXXXXXXXXXXXXXXXXXXXXX1XXXX0X
@@ -82,7 +83,7 @@ def test_apply_mask2(mask, number, expected):
 
 
 def test_resolve_floating():
-    assert resolve_floating('000000000000000000000000000000X1101X') == [26, 27, 58, 59]
+    assert list(resolve_floating('000000000000000000000000000000X1101X')) == [26, 27, 58, 59]
 
 
 def test_solution2():

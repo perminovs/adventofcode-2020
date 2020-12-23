@@ -1,5 +1,5 @@
 from queue import Queue
-from typing import Tuple, List
+from typing import Tuple, Iterator
 
 from day_14_python.data import MY_DATA
 
@@ -25,20 +25,17 @@ def apply_mask2(mask: str, number: str) -> str:
     return ''.join(d if m == '0' else m for d, m in zip(bin_num, wide_mask))
 
 
-def resolve_floating(number: str) -> List[int]:
+def resolve_floating(number: str) -> Iterator[int]:
     q = Queue()
     q.put(number)
-    options = []
     while not q.empty():
         n: str = q.get()
         if 'X' not in n:
-            options.append(bin_to_int(n))
+            yield bin_to_int(n)
             continue
 
         q.put(n.replace('X', '0', 1))
         q.put(n.replace('X', '1', 1))
-
-    return options
 
 
 def parse_mask(row: str) -> str:
