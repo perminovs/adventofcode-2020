@@ -25,3 +25,4 @@ libs/
 out/
 *.iml
 .gradle/
+*.pytest_cache/
