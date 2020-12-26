@@ -26,3 +26,7 @@ out/
 *.iml
 .gradle/
 *.pytest_cache/
+
+*.hi
+*.o
+*.bin
